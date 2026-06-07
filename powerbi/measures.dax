@@ -1,0 +1,31 @@
+Net Revenue :=
+SUM ( fct_orders[gross_revenue] )
+    - SUM ( fct_orders[discount_amount] )
+    - SUM ( fct_orders[refund_amount] )
+
+Contribution Margin :=
+[Net Revenue]
+    - SUM ( fct_orders[product_cost] )
+    - SUM ( fct_orders[payment_cost] )
+    - SUM ( fct_orders[fulfillment_cost] )
+    - SUM ( fct_orders[delivery_cost] )
+    - SUM ( fct_orders[attributed_marketing_cost] )
+
+Contribution Margin % :=
+DIVIDE ( [Contribution Margin], [Net Revenue] )
+
+Repeat Customers 90D :=
+CALCULATE (
+    DISTINCTCOUNT ( fct_orders[customer_id] ),
+    FILTER ( dim_customer, dim_customer[repeated_within_90d] = TRUE () )
+)
+
+Repeat Purchase Rate 90D :=
+DIVIDE ( [Repeat Customers 90D], DISTINCTCOUNT ( dim_customer[customer_id] ) )
+
+Contribution Margin YoY % :=
+VAR PreviousYear =
+    CALCULATE ( [Contribution Margin], SAMEPERIODLASTYEAR ( dim_date[date] ) )
+RETURN
+    DIVIDE ( [Contribution Margin] - PreviousYear, PreviousYear )
+
