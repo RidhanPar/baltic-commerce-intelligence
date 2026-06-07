@@ -1,0 +1,13 @@
+name: baltic_commerce
+version: "1.0.0"
+config-version: 2
+profile: baltic_commerce
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+models:
+  baltic_commerce:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

@@ -3,4 +3,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 data/processed/analytics.db
-
+data/processed/dbt_analytics.db
+dbt/.user.yml
+dbt/logs/
+dbt/target/

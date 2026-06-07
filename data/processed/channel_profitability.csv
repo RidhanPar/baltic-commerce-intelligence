@@ -1,6 +1,6 @@
-acquisition_channel,orders,customers,net_revenue,contribution_margin,contribution_margin_pct,contribution_margin_per_order
-Organic Search,836,479,48115.09,6628.04,0.1378,7.93
-CRM,702,383,38536.55,5178.46,0.1344,7.38
-Paid Search,1067,638,60382.9,207.49,0.0034,0.19
-Affiliate,463,310,24725.16,-326.44,-0.0132,-0.71
-Paid Social,823,590,44845.42,-6612.55,-0.1475,-8.03
+acquisition_channel,prospects,customers,conversion_rate,orders,net_revenue,contribution_margin,contribution_margin_pct,margin_per_prospect
+CRM,1031,495,0.4267,495,28672.99,3496.25,0.1219,3.39
+Organic Search,1202,527,0.3924,527,28736.89,2808.39,0.0977,2.34
+Affiliate,701,249,0.3225,249,14377.64,-323.09,-0.0225,-0.46
+Paid Search,1549,819,0.4522,819,43804.53,-3044.04,-0.0695,-1.97
+Paid Social,1517,488,0.2949,488,28118.53,-3965.57,-0.141,-2.61

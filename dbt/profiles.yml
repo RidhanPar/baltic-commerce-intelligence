@@ -1,0 +1,11 @@
+baltic_commerce:
+  target: dev
+  outputs:
+    dev:
+      type: sqlite
+      threads: 1
+      database: baltic_commerce
+      schema: main
+      schemas_and_paths:
+        main: "data/processed/dbt_analytics.db"
+      schema_directory: "data/processed"

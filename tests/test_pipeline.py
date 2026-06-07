@@ -16,31 +16,49 @@ class PipelineTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        generate(self.root / "data" / "raw", seed=11, customer_count=200)
+        (self.root / "docs").mkdir()
+        generate(self.root / "data" / "raw", seed=11, prospect_count=700)
         run(self.root)
+        self.conn = sqlite3.connect(self.root / "data" / "processed" / "analytics.db")
 
     def tearDown(self):
+        self.conn.close()
         self.temp.cleanup()
 
-    def test_orders_have_unique_ids(self):
-        with (self.root / "data" / "raw" / "orders.csv").open(newline="", encoding="utf-8") as handle:
-            ids = [row["order_id"] for row in csv.DictReader(handle)]
-        self.assertEqual(len(ids), len(set(ids)))
+    def test_unique_primary_keys(self):
+        for table, key in [("dim_prospect", "prospect_id"), ("dim_customer", "customer_id"), ("fct_orders", "order_id")]:
+            total, unique = self.conn.execute(f"SELECT COUNT(*), COUNT(DISTINCT {key}) FROM {table}").fetchone()
+            self.assertEqual(total, unique)
 
-    def test_completed_orders_reconcile(self):
-        conn = sqlite3.connect(self.root / "data" / "processed" / "analytics.db")
-        raw_total = conn.execute(
-            "SELECT ROUND(SUM(CAST(contribution_margin AS REAL)), 2) FROM fct_orders WHERE order_status='completed'"
-        ).fetchone()[0]
-        mart_total = conn.execute(
-            "SELECT ROUND(SUM(contribution_margin), 2) FROM mart_channel_profitability"
-        ).fetchone()[0]
-        conn.close()
+    def test_foreign_keys_are_valid(self):
+        self.assertEqual(self.conn.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_orders_reconcile_to_channel_mart(self):
+        raw_total = self.conn.execute("SELECT ROUND(SUM(contribution_margin),2) FROM fct_orders").fetchone()[0]
+        mart_total = self.conn.execute("SELECT ROUND(SUM(contribution_margin),2) FROM mart_channel_profitability").fetchone()[0]
         self.assertAlmostEqual(raw_total, mart_total, places=2)
+
+    def test_experiment_has_converters_and_non_converters(self):
+        minimum, maximum = self.conn.execute("SELECT MIN(converted), MAX(converted) FROM dim_prospect").fetchone()
+        self.assertEqual((minimum, maximum), (0, 1))
+        rates = [row[0] for row in self.conn.execute("SELECT conversion_rate FROM mart_experiment")]
+        self.assertTrue(all(0 < rate < 1 for rate in rates))
+
+    def test_experiment_output_has_statistics(self):
+        with (self.root / "data" / "processed" / "experiment.csv").open(newline="", encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+        self.assertIn("conversion_p_value", rows[0])
+        self.assertIn("srm_p_value", rows[0])
+
+    def test_typed_schema(self):
+        columns = {row[1]: row[2] for row in self.conn.execute("PRAGMA table_info(fct_orders)")}
+        self.assertEqual(columns["gross_revenue"], "REAL")
+        self.assertEqual(columns["order_id"], "TEXT")
 
     def test_artifacts_created(self):
         self.assertTrue((self.root / "artifacts" / "dashboard.html").exists())
         self.assertTrue((self.root / "artifacts" / "finance_analysis.xlsx").exists())
+        self.assertTrue((self.root / "docs" / "index.html").exists())
 
     def test_dashboard_has_no_negative_svg_widths(self):
         dashboard = (self.root / "artifacts" / "dashboard.html").read_text(encoding="utf-8")

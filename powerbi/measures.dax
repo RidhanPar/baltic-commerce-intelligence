@@ -1,31 +1,24 @@
+Eligible Prospects :=
+DISTINCTCOUNT ( dim_prospect[prospect_id] )
+
+Converted Prospects :=
+CALCULATE ( DISTINCTCOUNT ( dim_prospect[prospect_id] ), dim_prospect[converted] = 1 )
+
+Conversion Rate :=
+DIVIDE ( [Converted Prospects], [Eligible Prospects] )
+
 Net Revenue :=
-SUM ( fct_orders[gross_revenue] )
-    - SUM ( fct_orders[discount_amount] )
-    - SUM ( fct_orders[refund_amount] )
+SUM ( fct_orders[net_revenue] )
 
 Contribution Margin :=
-[Net Revenue]
-    - SUM ( fct_orders[product_cost] )
-    - SUM ( fct_orders[payment_cost] )
-    - SUM ( fct_orders[fulfillment_cost] )
-    - SUM ( fct_orders[delivery_cost] )
-    - SUM ( fct_orders[attributed_marketing_cost] )
+SUM ( fct_orders[contribution_margin] )
 
 Contribution Margin % :=
 DIVIDE ( [Contribution Margin], [Net Revenue] )
 
-Repeat Customers 90D :=
-CALCULATE (
-    DISTINCTCOUNT ( fct_orders[customer_id] ),
-    FILTER ( dim_customer, dim_customer[repeated_within_90d] = TRUE () )
-)
+Margin Per Eligible Prospect :=
+DIVIDE ( [Contribution Margin], [Eligible Prospects] )
 
-Repeat Purchase Rate 90D :=
-DIVIDE ( [Repeat Customers 90D], DISTINCTCOUNT ( dim_customer[customer_id] ) )
-
-Contribution Margin YoY % :=
-VAR PreviousYear =
-    CALCULATE ( [Contribution Margin], SAMEPERIODLASTYEAR ( dim_date[date] ) )
-RETURN
-    DIVIDE ( [Contribution Margin] - PreviousYear, PreviousYear )
+On-Time Delivery Rate :=
+AVERAGE ( fct_deliveries[on_time] )
 

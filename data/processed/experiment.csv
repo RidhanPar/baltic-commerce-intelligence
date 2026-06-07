@@ -1,3 +1,3 @@
-treatment,assigned_customers,margin_per_assigned_customer,conversion_rate
-control,1192,3.65,1.0
-treatment,1208,0.6,1.0
+treatment,assigned_prospects,converted_prospects,conversion_rate,margin_per_assigned_prospect,revenue_per_assigned_prospect,conversion_lift_pp,conversion_ci_low_pp,conversion_ci_high_pp,conversion_p_value,margin_lift_vs_control,srm_p_value
+control,3006,864,0.2874,0.37,22.51,3.76,1.43,6.09,0.0016,-1.08,0.8769
+treatment,2994,973,0.325,-0.71,25.4,3.76,1.43,6.09,0.0016,-1.08,0.8769

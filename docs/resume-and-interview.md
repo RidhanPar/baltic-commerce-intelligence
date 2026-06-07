@@ -2,25 +2,32 @@
 
 ## Resume Project Entry
 
-**Baltic Commerce Intelligence | End-to-End Data Analytics Portfolio**
+**Baltic Commerce Intelligence | End-to-End Analytics Case Study**
 
-- Built a reproducible e-commerce analytics platform using Python, SQL, Excel, Power BI/DAX, Snowflake, dbt, Databricks, Looker, and R.
-- Modeled and analyzed 3,891 orders across Latvia, Lithuania, and Estonia, identifying a €6.6k Paid Social loss and profitable Organic Search and CRM opportunities.
-- Automated data generation, ETL, quality validation, analytical marts, an HTML executive dashboard, and a formatted Excel workbook; added CI tests for unique keys and financial reconciliation.
+- Built a reproducible commerce analytics platform using Python, SQL, dbt, SQLite, Excel, and GitHub Actions, including a typed warehouse, 18 automated tests, and generated executive reporting.
+- Evaluated a randomized offer across 6,000 eligible prospects, identifying a statistically significant +3.76pp conversion lift but a EUR 1.08 decline in contribution margin per prospect.
+- Modeled acquisition, refunds, and delivery costs to identify profitable CRM and Organic Search growth and expose a high-conversion but loss-making Paid Search channel.
 
 ## Two-Minute Interview Story
 
-**Situation:** Leadership wanted profitable growth, but revenue, marketing, delivery, and customer-retention views were disconnected.
+**Situation:** A commerce leadership team wants growth, but conversion, acquisition spend, delivery performance, and profitability are reported separately.
 
-**Task:** Create a trusted analytical model and recommend where to invest or cut spend.
+**Task:** Build a trusted analytical model and decide where to invest and whether to launch a promotional offer.
 
-**Action:** I generated realistic source data, built a local analytical warehouse, created profitability and logistics marts in SQL, automated validation and reporting in Python, produced an Excel finance output, and documented cloud and BI implementations.
+**Action:** I created a deterministic synthetic source system, modeled eligible prospects through purchase and fulfillment, built a typed SQLite warehouse and runnable dbt project, added quality and reconciliation tests, and produced statistical experiment evidence, an executive dashboard, and an Excel finance workbook.
 
-**Result:** The analysis showed that Paid Social lost €6.6k despite meaningful revenue, while Organic Search and CRM generated the strongest margins. It also identified EconomyBox's 78.5% on-time delivery rate as an operational risk.
+**Result:** The treatment raised conversion significantly but reduced margin per prospect, so I recommended redesign rather than launch. The channel analysis also showed that the highest-converting channel was loss-making, changing the recommended acquisition strategy.
+
+## Strong Interview Discussion Points
+
+- Why intention-to-treat analysis starts with all eligible assigned prospects, including non-buyers.
+- Why statistical significance does not imply commercial value.
+- How primary keys, foreign keys, typed fields, reconciliations, and CI create trust.
+- Why margin per prospect is more decision-relevant than conversion or revenue alone.
+- How the same semantic model can be implemented in Power BI, Snowflake, Databricks, and Looker.
 
 ## Honest Positioning
 
-- Say the dataset is synthetic.
-- Emphasize that the pipeline and findings are fully reproducible.
-- Do not claim hands-on production use of paid cloud tools if you only implemented the included examples.
-
+- State clearly that the data is synthetic.
+- Describe Python, SQLite, SQL, dbt, Excel, dashboard, and CI components as runnable and validated.
+- Describe Power BI/DAX, Snowflake, Databricks, Looker, and R components as implementation blueprints unless you separately deploy and validate them.

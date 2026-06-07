@@ -1,108 +1,95 @@
 # Baltic Commerce Intelligence
 
-![CI](https://github.com/RidhanPar/baltic-commerce-intelligence/actions/workflows/test.yml/badge.svg)
+[![CI](https://github.com/RidhanPar/baltic-commerce-intelligence/actions/workflows/test.yml/badge.svg)](https://github.com/RidhanPar/baltic-commerce-intelligence/actions/workflows/test.yml)
 
-An end-to-end data analytics portfolio project that answers:
+An end-to-end analytics case study answering:
 
-> Which acquisition channels create profitable, repeatable growth after marketing, refunds, and delivery costs?
+> Which acquisition channels create profitable growth, and should a free-shipping offer be launched?
 
-The project is designed around recurring data analyst requirements found in Latvian CV.lv vacancies: SQL, Python, Power BI/DAX, Excel, data modeling, ETL, data quality, experimentation, Snowflake, Databricks, Looker, dbt, Git, and stakeholder communication.
+![Dashboard preview](docs/dashboard-preview.svg)
 
-## Business Results
+## Decision Summary
 
-Analysis of the reproducible synthetic 2025 dataset found:
+Analysis of 6,000 eligible prospects across Latvia, Lithuania, and Estonia found:
 
-- **Organic Search and CRM generate €11.8k of contribution margin** and margin rates above 13%.
-- **Paid Social loses €6.6k**, with a -14.8% contribution-margin rate.
-- **EconomyBox delivers only 78.5% of orders on time**, versus 95.8% for FastShip.
-- The free-shipping treatment produces lower margin per assigned customer than control in the generated experiment dataset.
+- The free-shipping treatment increased conversion by **3.76 percentage points** (95% CI: **+1.43 to +6.09pp**, p=0.0016), but reduced contribution margin by **EUR 1.08 per eligible prospect**. Recommendation: **redesign, do not launch**.
+- **CRM** and **Organic Search** produced the strongest profit per prospect. **Paid Search** converted well but lost EUR 3.0k after acquisition and variable costs, showing why conversion alone is insufficient.
+- **FastShip** delivered the strongest on-time service, while lower-cost carriers showed meaningful service tradeoffs by market.
 
-**Recommendation:** Reallocate low-quality Paid Social spend toward Organic Search and CRM, investigate EconomyBox lanes, and do not launch the free-shipping treatment without redesigning and retesting it.
+Open the [live executive dashboard](https://ridhanpar.github.io/baltic-commerce-intelligence/) or the repository copy at [`artifacts/dashboard.html`](artifacts/dashboard.html).
 
-## Dashboard
+## What Runs
 
-Open [`artifacts/dashboard.html`](artifacts/dashboard.html) for the generated executive dashboard.
+The local pipeline is fully reproducible and uses Python, SQL, SQLite, dbt, Excel, HTML, and GitHub Actions:
 
-The pipeline also creates:
+```powershell
+python -m pip install -r requirements.txt
+./run.ps1
+```
 
-- [`artifacts/finance_analysis.xlsx`](artifacts/finance_analysis.xlsx): formatted Excel analysis workbook
-- [`data/processed/channel_profitability.csv`](data/processed/channel_profitability.csv): channel profitability mart
-- [`data/processed/logistics.csv`](data/processed/logistics.csv): carrier performance mart
-- [`data/processed/experiment.csv`](data/processed/experiment.csv): experiment result mart
+It regenerates the synthetic source data, creates a typed analytical warehouse, produces decision marts, builds the dashboard and Excel workbook, runs eight Python quality tests, loads dbt seeds, and runs five dbt models with ten dbt tests.
+
+Key outputs:
+
+- [`artifacts/dashboard.html`](artifacts/dashboard.html): executive decision dashboard
+- [`artifacts/finance_analysis.xlsx`](artifacts/finance_analysis.xlsx): formatted finance workbook
+- [`data/processed/experiment.csv`](data/processed/experiment.csv): experiment results and statistical evidence
+- [`data/processed/channel_profitability.csv`](data/processed/channel_profitability.csv): acquisition funnel and profitability
+- [`docs/analysis.md`](docs/analysis.md): decision memo
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    A[Synthetic commerce sources] --> B[Python validation and ETL]
-    B --> C[SQLite analytical warehouse]
-    C --> D[SQL profitability marts]
-    D --> E[HTML executive dashboard]
-    D --> F[Excel finance workbook]
-    D --> G[Decision recommendations]
-    H[Snowflake, dbt, Databricks, Looker, DAX, R] --> I[Cloud and BI implementation examples]
+    A[6,000 eligible prospects] --> B[Randomized experiment]
+    A --> C[Customers, orders, spend, deliveries]
+    B --> D[Python validation and typed SQLite warehouse]
+    C --> D
+    D --> E[SQL and dbt models]
+    E --> F[HTML dashboard]
+    E --> G[Excel finance workbook]
+    E --> H[Statistical decision memo]
 ```
 
-The runnable local version uses SQLite so reviewers can reproduce it without paid accounts. Cloud-ready examples demonstrate how the same model maps to Snowflake, dbt, Databricks, Looker, Power BI/DAX, and R.
+## Evidence by Skill
 
-## Run Locally
+| Capability | Runnable evidence |
+|---|---|
+| SQL and data modeling | Typed star-schema warehouse, foreign keys, profitability and logistics marts |
+| Python | Deterministic data generation, ETL, experiment inference, dashboard and workbook automation |
+| dbt | Runnable SQLite project with staging/mart models, documentation, and ten tests |
+| Statistics | Intention-to-treat conversion lift, confidence interval, p-value, margin lift, and sample-ratio mismatch check |
+| Excel | Generated finance workbook with formatted tables, filters, frozen panes, KPIs, and chart |
+| Data quality and CI | Eight pipeline tests plus dbt build in GitHub Actions |
+| Business communication | Executive dashboard, decision memo, methodology, caveats, and interview guide |
 
-Requirements: Python 3.10+ and `openpyxl`.
+The repository also includes implementation blueprints for Power BI/DAX, Snowflake, Databricks, Looker, and R. These show how the validated core model maps to those platforms; they are **not presented as deployed production systems**. See [`docs/platform-extensions.md`](docs/platform-extensions.md).
 
-```powershell
-python -m pip install -r requirements.txt
-python python/generate_data.py
-python python/run_pipeline.py
-python -m unittest discover -s tests -v
-```
-
-Or on Windows:
-
-```powershell
-./run.ps1
-```
-
-The generator uses a fixed seed, making all outputs deterministic and testable.
-
-## Repository Structure
+## Repository Map
 
 ```text
-artifacts/       Generated HTML dashboard and Excel workbook
-data/raw/        Five realistic source-system extracts
-data/processed/  Analytical marts and local SQLite warehouse
-python/          Data generation, validation, ETL, dashboard, and Excel code
-sql/             Advanced analytical SQL
-tests/           Data-quality and reconciliation tests
-dbt/             dbt mart and schema tests
-powerbi/         DAX measures
-looker/          LookML semantic model
-snowflake/       Warehouse and role setup
-databricks/      Clickstream pipeline example
-r/               Experiment-analysis example
-docs/            Analysis, architecture, CV.lv research, and resume bullets
+python/          Data generation, typed ETL, statistics, dashboard, Excel
+dbt/             Runnable dbt project, models, tests, and seed loader
+sql/             Analytical SQL examples
+tests/           Data quality, reconciliation, schema, and artifact tests
+artifacts/       Generated dashboard and Excel workbook
+data/            Reproducible raw sources, marts, and local warehouse
+docs/            Decision memo, methodology, architecture, and interview guide
+powerbi/         DAX measures and report implementation guide
+snowflake/       Warehouse and access-control blueprint
+databricks/      Bronze/Silver pipeline blueprint
+looker/          Governed semantic-model blueprint
+r/               Independent experiment-analysis implementation
 ```
 
-## Skills Demonstrated
+## Methodology and Limits
 
-| Skill | Evidence |
-|---|---|
-| SQL | Analytical marts, cohort logic, window functions, profitability analysis |
-| Python | Deterministic data generation, ETL, validation, dashboard and Excel automation |
-| Data quality | Unique-key, reconciliation, artifact, and CI tests |
-| Excel | Generated executive workbook with formatted tables and chart |
-| Power BI / DAX | Reusable measures for revenue, margin, retention, and YoY |
-| R / statistics | Intention-to-treat experiment analysis |
-| Snowflake / dbt | Layered warehouse, roles, modular model, schema tests |
-| Databricks | Bronze/Silver clickstream pipeline with quality expectations |
-| Looker | Governed profitability dimensions and measures |
-| Business analysis | Quantified findings, recommendations, and explicit caveats |
+The data is synthetic, deterministic, and designed to require multi-factor analysis rather than encode a single obvious answer. Treatment assignment is randomized before purchase, and both cohorts contain converters and non-converters. Full assumptions are documented in [`docs/synthetic-data-methodology.md`](docs/synthetic-data-methodology.md).
+
+This project demonstrates analytical judgment and implementation ability. It does not claim results from a real company or production experience with every platform represented.
 
 ## Resume Bullets
 
-- Built an end-to-end Baltic e-commerce analytics platform using Python, SQL, dbt-style modeling, Power BI/DAX, Excel, Snowflake, Databricks, Looker, and R.
-- Modeled and analyzed 3,891 synthetic orders across three markets, identifying a €6.6k Paid Social loss and profitable Organic Search and CRM opportunities.
-- Automated a tested pipeline that produces an analytical warehouse, executive HTML dashboard, Excel finance workbook, and decision-ready marts.
-
-## Important Note
-
-All commercial data is synthetic and generated by the repository. Findings demonstrate analytical methodology and portfolio capability, not results from a real company.
+- Built a reproducible commerce analytics platform using Python, SQL, dbt, SQLite, Excel, and GitHub Actions, with a typed warehouse, 18 automated data tests, and generated executive reporting.
+- Evaluated a randomized offer across 6,000 eligible prospects, finding statistically significant conversion lift but a EUR 1.08 decline in margin per prospect, leading to a redesign recommendation.
+- Identified profitable CRM and Organic Search growth alongside a high-conversion but loss-making Paid Search channel by modeling acquisition, refunds, and delivery costs.

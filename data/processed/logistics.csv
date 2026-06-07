@@ -1,4 +1,10 @@
-carrier,deliveries,on_time_rate,avg_delivery_cost
-FastShip,1304,0.9578,5.52
-BalticPost,1738,0.916,4.58
-EconomyBox,849,0.7845,3.97
+carrier,market,deliveries,on_time_rate,avg_delivery_cost
+BalticPost,EE,212,0.8585,5.41
+BalticPost,LT,367,0.8992,4.8
+BalticPost,LV,544,0.932,4.14
+EconomyBox,EE,116,0.8621,4.75
+EconomyBox,LT,168,0.8333,4.2
+EconomyBox,LV,291,0.8763,3.54
+FastShip,EE,176,0.9375,6.42
+FastShip,LT,277,0.9711,5.8
+FastShip,LV,427,0.9649,5.0

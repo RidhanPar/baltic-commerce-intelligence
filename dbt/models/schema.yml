@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: stg_prospects
+    columns:
+      - name: prospect_id
+        tests: [unique, not_null]
+      - name: market
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['LV', 'LT', 'EE']
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: prospect_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_prospects')
+                field: prospect_id
+  - name: mart_customer_profitability
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: mart_channel_funnel
+    columns:
+      - name: acquisition_channel
+        tests: [unique, not_null]

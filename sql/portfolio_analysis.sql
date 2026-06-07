@@ -13,6 +13,7 @@ ORDER BY profitability_rank;
 
 -- 2. Find low-cost carriers with a material reliability tradeoff.
 SELECT
+    market,
     carrier,
     deliveries,
     on_time_rate,
@@ -25,10 +26,11 @@ ORDER BY on_time_rate;
 -- 3. Compare experiment outcomes using intention-to-treat assignment.
 SELECT
     treatment,
-    assigned_customers,
-    margin_per_assigned_customer,
-    margin_per_assigned_customer
-        - MAX(CASE WHEN treatment = 'control' THEN margin_per_assigned_customer END) OVER ()
+    assigned_prospects,
+    converted_prospects,
+    conversion_rate,
+    margin_per_assigned_prospect,
+    margin_per_assigned_prospect
+        - MAX(CASE WHEN treatment = 'control' THEN margin_per_assigned_prospect END) OVER ()
         AS margin_lift_vs_control
 FROM mart_experiment;
-
