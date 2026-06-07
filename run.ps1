@@ -7,4 +7,4 @@ $python = if ($env:PYTHON) { $env:PYTHON } else { 'python' }
 $dbt = Join-Path (Split-Path $python) 'Scripts\dbt.exe'
 if (-not (Test-Path $dbt)) { $dbt = 'dbt' }
 & $dbt build --project-dir dbt --profiles-dir dbt --no-partial-parse
-Write-Host 'Built artifacts/dashboard.html and artifacts/finance_analysis.xlsx'
+Write-Host 'Built docs/index.html and artifacts/Baltic_Commerce_Analysis.xlsx'

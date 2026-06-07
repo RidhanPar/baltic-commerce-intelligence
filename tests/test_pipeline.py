@@ -56,12 +56,22 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(columns["order_id"], "TEXT")
 
     def test_artifacts_created(self):
-        self.assertTrue((self.root / "artifacts" / "dashboard.html").exists())
-        self.assertTrue((self.root / "artifacts" / "finance_analysis.xlsx").exists())
+        self.assertTrue((self.root / "artifacts" / "Baltic_Commerce_Analysis.xlsx").exists())
         self.assertTrue((self.root / "docs" / "index.html").exists())
 
+    def test_excel_is_real_workbook_with_recruiter_ready_sheets(self):
+        from openpyxl import load_workbook
+
+        workbook = load_workbook(self.root / "artifacts" / "Baltic_Commerce_Analysis.xlsx", data_only=False)
+        self.assertEqual(
+            workbook.sheetnames,
+            ["Executive Overview", "Channel Analysis", "Market Analysis", "Logistics Analysis", "Experiment Analysis", "Data Dictionary"],
+        )
+        self.assertTrue(workbook["Channel Analysis"]["I2"].value.startswith("=IF("))
+        self.assertGreater(len(workbook["Channel Analysis"]._charts), 0)
+
     def test_dashboard_has_no_negative_svg_widths(self):
-        dashboard = (self.root / "artifacts" / "dashboard.html").read_text(encoding="utf-8")
+        dashboard = (self.root / "docs" / "index.html").read_text(encoding="utf-8")
         self.assertNotIn('width="-', dashboard)
 
 

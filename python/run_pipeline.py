@@ -6,14 +6,14 @@ import argparse
 import csv
 import html
 import math
-import shutil
 import sqlite3
 from pathlib import Path
 
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
 from openpyxl.formatting.rule import ColorScaleRule
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
 
 SCHEMAS = {
@@ -257,40 +257,134 @@ def build_preview_svg(output: Path, channels: list[dict], experiment: list[dict]
     )
 
 
+def style_data_sheet(sheet, currency_columns: set[int], percent_columns: set[int]) -> None:
+    navy, blue, white = "163A70", "2563EB", "FFFFFF"
+    sheet.sheet_view.showGridLines = False
+    sheet.freeze_panes = "A2"
+    sheet.auto_filter.ref = sheet.dimensions
+    sheet.row_dimensions[1].height = 28
+    for cell in sheet[1]:
+        cell.font = Font(bold=True, color=white)
+        cell.fill = PatternFill("solid", fgColor=navy)
+        cell.alignment = Alignment(horizontal="center")
+    for row in sheet.iter_rows(min_row=2):
+        for cell in row:
+            cell.border = Border(bottom=Side(style="hair", color="D9E2F3"))
+        for index in currency_columns:
+            row[index - 1].number_format = 'EUR #,##0.00;[Red]-EUR #,##0.00'
+        for index in percent_columns:
+            row[index - 1].number_format = "0.0%"
+    table = Table(displayName=sheet.title.replace(" ", "") + "Table", ref=sheet.dimensions)
+    table.tableStyleInfo = TableStyleInfo(name="TableStyleMedium2", showRowStripes=True, showColumnStripes=False)
+    sheet.add_table(table)
+    sheet.sheet_properties.tabColor = blue
+    for column_index, column in enumerate(sheet.columns, start=1):
+        sheet.column_dimensions[get_column_letter(column_index)].width = min(30, max(13, max(len(str(cell.value or "")) for cell in column) + 2))
+
+
 def build_excel(output: Path, channels: list[dict], markets: list[dict], logistics: list[dict], experiment: list[dict]) -> None:
     workbook = Workbook()
-    summary = workbook.active
-    summary.title = "Executive Summary"
-    summary.append(["Baltic Commerce Intelligence", "Reproducible synthetic portfolio data"])
-    summary["A1"].font = Font(size=18, bold=True, color="FFFFFF")
-    summary["A1"].fill = PatternFill("solid", fgColor="163A70")
-    summary.merge_cells("A1:F1")
-    summary.append([])
-    summary.append(["Channel", "Prospects", "Conversion", "Net Revenue", "Contribution Margin", "Margin/Prospect"])
+    cover = workbook.active
+    cover.title = "Executive Overview"
+    cover.sheet_view.showGridLines = False
+    cover.merge_cells("A1:H2")
+    cover["A1"] = "Baltic Commerce Intelligence"
+    cover["A1"].font = Font(size=24, bold=True, color="FFFFFF")
+    cover["A1"].fill = PatternFill("solid", fgColor="163A70")
+    cover["A1"].alignment = Alignment(vertical="center")
+    cover.merge_cells("A3:H3")
+    cover["A3"] = "Decision workbook | Synthetic, reproducible 2025 portfolio data"
+    cover["A3"].font = Font(italic=True, color="60708A")
+    cover["A5"], cover["C5"], cover["E5"], cover["G5"] = "Eligible Prospects", "Conversion Rate", "Net Revenue", "Contribution Margin"
+    cover["A6"] = sum(row["prospects"] for row in channels)
+    cover["C6"] = sum(row["customers"] for row in channels) / cover["A6"].value
+    cover["E6"] = sum(row["net_revenue"] for row in channels)
+    cover["G6"] = sum(row["contribution_margin"] for row in channels)
+    for cell in ["A5", "C5", "E5", "G5"]:
+        cover[cell].font = Font(bold=True, color="FFFFFF")
+        cover[cell].fill = PatternFill("solid", fgColor="2563EB")
+        cover[cell].alignment = Alignment(horizontal="center")
+    for cell in ["A6", "C6", "E6", "G6"]:
+        cover[cell].font = Font(size=18, bold=True, color="163A70")
+        cover[cell].alignment = Alignment(horizontal="center")
+    cover["C6"].number_format = "0.0%"
+    cover["E6"].number_format = cover["G6"].number_format = 'EUR #,##0;[Red]-EUR #,##0'
+    cover.merge_cells("A9:H9")
+    cover["A9"] = "Executive decision"
+    cover["A9"].font = Font(size=15, bold=True, color="FFFFFF")
+    cover["A9"].fill = PatternFill("solid", fgColor="163A70")
+    cover.merge_cells("A10:H12")
+    cover["A10"] = (
+        "REDESIGN, DO NOT LAUNCH: the treatment raises conversion by 3.76 percentage points "
+        "but reduces contribution margin by EUR 1.08 per eligible prospect. Protect CRM and Organic Search; "
+        "rebuild Paid Search decisions around contribution margin."
+    )
+    cover["A10"].alignment = Alignment(wrap_text=True, vertical="top")
+    cover["A10"].fill = PatternFill("solid", fgColor="EAF2F8")
+    cover.merge_cells("A14:H14")
+    cover["A14"] = "Workbook navigation"
+    cover["A14"].font = Font(size=15, bold=True, color="FFFFFF")
+    cover["A14"].fill = PatternFill("solid", fgColor="163A70")
+    for row, (label, target, description) in enumerate(
+        [
+            ("Channel Analysis", "Channel Analysis", "Acquisition funnel and contribution economics"),
+            ("Market Analysis", "Market Analysis", "Commercial performance by Baltic market"),
+            ("Logistics Analysis", "Logistics Analysis", "Carrier cost and service tradeoffs"),
+            ("Experiment Analysis", "Experiment Analysis", "Randomized offer results and inference"),
+            ("Data Dictionary", "Data Dictionary", "Definitions for decision metrics"),
+        ],
+        start=16,
+    ):
+        cover.cell(row, 1, label).hyperlink = f"#'{target}'!A1"
+        cover.cell(row, 1).style = "Hyperlink"
+        cover.cell(row, 3, description)
+    for column in "ABCDEFGH":
+        cover.column_dimensions[column].width = 18
+    cover.column_dimensions["A"].width = 24
+    cover.column_dimensions["C"].width = 25
+
+    summary = workbook.create_sheet("Channel Analysis")
+    summary.append(["Channel", "Prospects", "Customers", "Conversion Rate", "Net Revenue", "Contribution Margin", "Margin Rate", "Margin / Prospect", "Decision"])
     for row in channels:
-        summary.append([row["acquisition_channel"], row["prospects"], row["conversion_rate"], row["net_revenue"], row["contribution_margin"], row["margin_per_prospect"]])
-    summary.freeze_panes = "A4"
-    summary.auto_filter.ref = f"A3:F{3 + len(channels)}"
-    summary.conditional_formatting.add(f"E4:E{3 + len(channels)}", ColorScaleRule(start_type="min", start_color="F8696B", mid_type="percentile", mid_value=50, mid_color="FFEB84", end_type="max", end_color="63BE7B"))
+        summary.append([row["acquisition_channel"], row["prospects"], row["customers"], row["conversion_rate"], row["net_revenue"], row["contribution_margin"], row["contribution_margin_pct"], row["margin_per_prospect"], None])
+        summary.cell(summary.max_row, 9, f'=IF(H{summary.max_row}>2,"Scale",IF(H{summary.max_row}>0,"Protect","Fix / Pause"))')
+    style_data_sheet(summary, {5, 6, 8}, {4, 7})
+    summary.conditional_formatting.add(f"F2:F{1 + len(channels)}", ColorScaleRule(start_type="min", start_color="F8696B", mid_type="percentile", mid_value=50, mid_color="FFEB84", end_type="max", end_color="63BE7B"))
     chart = BarChart()
     chart.title = "Contribution Margin by Channel"
-    chart.add_data(Reference(summary, min_col=5, min_row=3, max_row=3 + len(channels)), titles_from_data=True)
-    chart.set_categories(Reference(summary, min_col=1, min_row=4, max_row=3 + len(channels)))
-    summary.add_chart(chart, "H3")
-    for title, rows in [("Market Detail", markets), ("Logistics Detail", logistics), ("Experiment Detail", experiment)]:
+    chart.y_axis.title = "Channel"
+    chart.x_axis.title = "EUR"
+    chart.add_data(Reference(summary, min_col=6, min_row=1, max_row=1 + len(channels)), titles_from_data=True)
+    chart.set_categories(Reference(summary, min_col=1, min_row=2, max_row=1 + len(channels)))
+    summary.add_chart(chart, "K2")
+
+    sheets = [
+        ("Market Analysis", markets, {3, 4, 5}, set()),
+        ("Logistics Analysis", logistics, {5}, {4}),
+        ("Experiment Analysis", experiment, {5, 6, 11}, {4}),
+    ]
+    for title, rows, currencies, percentages in sheets:
         sheet = workbook.create_sheet(title)
         sheet.append(list(rows[0]))
         for row in rows:
             sheet.append(list(row.values()))
-        sheet.freeze_panes = "A2"
-        sheet.auto_filter.ref = sheet.dimensions
-        for cell in sheet[1]:
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill("solid", fgColor="2563EB")
-    for sheet in workbook.worksheets:
-        for column_index, column in enumerate(sheet.columns, start=1):
-            letter = get_column_letter(column_index)
-            sheet.column_dimensions[letter].width = min(28, max(12, max(len(str(cell.value or "")) for cell in column) + 2))
+        style_data_sheet(sheet, currencies, percentages)
+
+    dictionary = workbook.create_sheet("Data Dictionary")
+    dictionary.append(["Metric", "Definition", "Decision use"])
+    for item in [
+        ("Eligible prospects", "All prospects randomized before purchase, including non-buyers", "Experiment denominator"),
+        ("Conversion rate", "Converted prospects / eligible prospects", "Growth outcome"),
+        ("Net revenue", "Gross revenue less discounts and refunds", "Commercial value"),
+        ("Contribution margin", "Net revenue less product, delivery, payment, fulfillment, and attributed marketing cost", "Primary profitability outcome"),
+        ("Margin / prospect", "Contribution margin / eligible prospects", "Acquisition and experiment decision metric"),
+        ("On-time rate", "Deliveries completed on or before promised date", "Carrier service quality"),
+        ("SRM p-value", "Sample-ratio mismatch test p-value", "Randomization health check"),
+    ]:
+        dictionary.append(item)
+    style_data_sheet(dictionary, set(), set())
+    dictionary.column_dimensions["B"].width = 70
+    dictionary.column_dimensions["C"].width = 32
     output.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(output)
 
@@ -317,10 +411,9 @@ def run(root: Path) -> None:
             (SELECT ROUND(SUM(contribution_margin),2) FROM fct_orders) contribution_margin FROM dim_prospect""")[0]
         for name, rows in [("channel_profitability", channels), ("market_profitability", markets), ("logistics", logistics), ("experiment", experiment)]:
             write_csv_rows(processed / f"{name}.csv", rows)
-        build_dashboard(artifacts / "dashboard.html", channels, logistics, experiment, summary)
-        shutil.copyfile(artifacts / "dashboard.html", root / "docs" / "index.html")
+        build_dashboard(root / "docs" / "index.html", channels, logistics, experiment, summary)
         build_preview_svg(root / "docs" / "dashboard-preview.svg", channels, experiment, summary)
-        build_excel(artifacts / "finance_analysis.xlsx", channels, markets, logistics, experiment)
+        build_excel(artifacts / "Baltic_Commerce_Analysis.xlsx", channels, markets, logistics, experiment)
     finally:
         conn.close()
 

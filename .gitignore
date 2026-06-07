@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 data/processed/analytics.db
 data/processed/dbt_analytics.db
+data/raw/*.csv
 dbt/.user.yml
 dbt/logs/
 dbt/target/
