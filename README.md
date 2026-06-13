@@ -27,7 +27,7 @@ python -m pip install -r requirements.txt
 ./run.ps1
 ```
 
-It regenerates the synthetic source data, creates a typed analytical warehouse, produces decision marts, builds the dashboard and Excel workbook, runs nine Python quality tests, loads dbt seeds, and runs five dbt models with ten dbt tests.
+It regenerates the synthetic source data, creates a typed analytical warehouse, produces decision marts, builds the dashboard and Excel workbook, runs the Python quality suite, loads dbt seeds, and validates five dbt models.
 
 Key outputs:
 
@@ -60,10 +60,12 @@ flowchart LR
 | dbt | Runnable SQLite project with staging/mart models, documentation, and ten tests |
 | Statistics | Intention-to-treat conversion lift, confidence interval, p-value, margin lift, and sample-ratio mismatch check |
 | Excel | Downloadable `.xlsx` workbook with formulas, structured tables, filters, navigation, conditional formatting, chart, and executive decision page |
-| Data quality and CI | Eight pipeline tests plus dbt build in GitHub Actions |
+| Data quality and CI | Python pipeline tests plus dbt build in GitHub Actions |
 | Business communication | Executive dashboard, decision memo, methodology, caveats, and interview guide |
 
 The Power BI folder contains a documented semantic-model design and DAX measures. It is supporting evidence, not a claim that a `.pbix` report was deployed.
+
+No LLM or autonomous agent is used in the analytical pipeline. The calculations, statistical tests, dashboard, memo, and workbook are deterministic and reproducible from the generated source data.
 
 ## Repository Map
 
