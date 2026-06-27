@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/RidhanPar/baltic-commerce-intelligence/actions/workflows/test.yml/badge.svg)](https://github.com/RidhanPar/baltic-commerce-intelligence/actions/workflows/test.yml)
 
+Market analytics platform tracking retail and logistics trends across Baltic e-commerce markets (Estonia, Latvia, Lithuania). Built to support strategic planning decisions with automated data pipelines and executive-ready dashboards.
+
 An end-to-end analytics case study answering:
 
 > Which acquisition channels create profitable growth, and should a free-shipping offer be launched?
@@ -9,6 +11,10 @@ An end-to-end analytics case study answering:
 ![Dashboard preview](docs/dashboard-preview.svg)
 
 **Review the deliverables:** [Live dashboard](https://ridhanpar.github.io/baltic-commerce-intelligence/) | [Download the real Excel workbook](artifacts/Baltic_Commerce_Analysis.xlsx) | [Read the decision memo](docs/analysis.md)
+
+## Baltic Region Context
+
+Built with an understanding of Baltic business dynamics — including seasonal e-commerce peaks, cross-border logistics patterns, and regional market differences. Designed for teams operating across Riga, Tallinn, and Vilnius.
 
 ## Decision Summary
 
