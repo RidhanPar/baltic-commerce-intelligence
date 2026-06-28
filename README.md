@@ -57,6 +57,14 @@ flowchart LR
     E --> H[Statistical decision memo]
 ```
 
+## Cloud Deployment Path
+
+The pipeline is cloud-agnostic by design. To move to production:
+- Swap SQLite for Amazon Redshift or Google BigQuery — the dbt models use only standard SQL and require no changes
+- Load source data via S3 COPY (Redshift) or GCS (BigQuery) instead of local CSV generation
+- Schedule the pipeline with Airflow or Prefect — each Python module in python/ is already a discrete, importable step
+- The Excel workbook and dashboard outputs can be written to S3 or GCS for distribution
+
 ## Evidence by Skill
 
 | Capability | Runnable evidence |
